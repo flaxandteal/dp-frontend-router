@@ -17,23 +17,25 @@ import (
 type Handler http.Handler
 
 type Config struct {
-	HealthCheckHandler   func(w http.ResponseWriter, req *http.Request)
-	AnalyticsHandler     http.Handler
-	DownloadHandler      http.Handler
-	DatasetEnabled       bool
-	DatasetHandler       http.Handler
-	PrefixDatasetHandler http.Handler
-	CookieHandler        http.Handler
-	FilterHandler        http.Handler
-	FeedbackHandler      http.Handler
-	ContentTypeByteLimit int
-	ZebedeeClient        allRoutes.ZebedeeClient
-	GeographyEnabled     bool
-	GeographyHandler     http.Handler
-	SearchRoutesEnabled  bool
-	SearchHandler        http.Handler
-	HomepageHandler      http.Handler
-	BabbageHandler       http.Handler
+	HealthCheckHandler           func(w http.ResponseWriter, req *http.Request)
+	AnalyticsHandler             http.Handler
+	DownloadHandler              http.Handler
+	DatasetEnabled               bool
+	DatasetReferenceTableEnabled bool
+	DatasetHandler               http.Handler
+	PrefixDatasetHandler         http.Handler
+	DatasetReferenceTableHandler http.Handler
+	CookieHandler                http.Handler
+	FilterHandler                http.Handler
+	FeedbackHandler              http.Handler
+	ContentTypeByteLimit         int
+	ZebedeeClient                allRoutes.ZebedeeClient
+	GeographyEnabled             bool
+	GeographyHandler             http.Handler
+	SearchRoutesEnabled          bool
+	SearchHandler                http.Handler
+	HomepageHandler              http.Handler
+	BabbageHandler               http.Handler
 }
 
 func New(cfg Config) http.Handler {
@@ -82,6 +84,10 @@ func New(cfg Config) http.Handler {
 	if cfg.DatasetEnabled {
 		handlers["dataset"] = cfg.PrefixDatasetHandler
 	}
+	if cfg.DatasetReferenceTableEnabled {
+		handlers["reference_tables"] = cfg.DatasetReferenceTableHandler
+	}
+
 	allRoutesMiddleware := allRoutes.Handler(handlers, cfg.ZebedeeClient, cfg.ContentTypeByteLimit)
 	babbageRouter := router.PathPrefix("/").Subrouter()
 	babbageRouter.Use(allRoutesMiddleware)

@@ -65,6 +65,13 @@ func main() {
 		os.Exit(1)
 	}
 
+	var datasetReferenceTablePath = cfg.DatasetControllerURL + "/dataset_reference_table"
+	datasetReferenceTableURL, err := url.Parse(datasetReferenceTablePath)
+	if err != nil {
+		log.Event(nil, "configuration value is invalid", log.FATAL, log.Data{"config_name": "DatasetReferenceTablePath", "value": datasetReferenceTablePath}, log.Error(err))
+		os.Exit(1)
+	}
+
 	filterDatasetControllerURL, err := url.Parse(cfg.FilterDatasetControllerURL)
 	if err != nil {
 		log.Event(nil, "configuration value is invalid", log.FATAL, log.Data{"config_name": "FilterDatasetControllerURL", "value": cfg.FilterDatasetControllerURL}, log.Error(err))
@@ -138,6 +145,7 @@ func main() {
 	cookieHandler := createReverseProxy("cookies", cookiesControllerURL)
 	datasetHandler := createReverseProxy("datasets", datasetControllerURL)
 	prefixDatasetHandler := createReverseProxy("datasets", prefixDatasetControllerURL)
+	datasetReferenceTableHandler := createReverseProxy("dataset_reference_table", datasetReferenceTableURL)
 	filterHandler := createReverseProxy("filters", filterDatasetControllerURL)
 	feedbackHandler := createReverseProxy("feedback", feedbackControllerURL)
 	geographyHandler := createReverseProxy("geography", geographyControllerURL)
@@ -146,23 +154,25 @@ func main() {
 	babbageHandler := createReverseProxy("babbage", babbageURL)
 
 	routerConfig := router.Config{
-		AnalyticsHandler:     analyticsHandler,
-		DownloadHandler:      downloadHandler,
-		CookieHandler:        cookieHandler,
-		DatasetEnabled:       cfg.DatasetEnabled,
-		DatasetHandler:       datasetHandler,
-		PrefixDatasetHandler: prefixDatasetHandler,
-		HealthCheckHandler:   hc.Handler,
-		FilterHandler:        filterHandler,
-		FeedbackHandler:      feedbackHandler,
-		GeographyEnabled:     cfg.GeographyEnabled,
-		GeographyHandler:     geographyHandler,
-		SearchRoutesEnabled:  cfg.SearchRoutesEnabled,
-		SearchHandler:        searchHandler,
-		HomepageHandler:      homepageHandler,
-		BabbageHandler:       babbageHandler,
-		ZebedeeClient:        zebedeeClient,
-		ContentTypeByteLimit: cfg.ContentTypeByteLimit,
+		AnalyticsHandler:             analyticsHandler,
+		DownloadHandler:              downloadHandler,
+		CookieHandler:                cookieHandler,
+		DatasetEnabled:               cfg.DatasetEnabled,
+		DatasetReferenceTableEnabled: cfg.DatasetReferenceTableEnabled,
+		DatasetHandler:               datasetHandler,
+		PrefixDatasetHandler:         prefixDatasetHandler,
+		DatasetReferenceTableHandler: datasetReferenceTableHandler,
+		HealthCheckHandler:           hc.Handler,
+		FilterHandler:                filterHandler,
+		FeedbackHandler:              feedbackHandler,
+		GeographyEnabled:             cfg.GeographyEnabled,
+		GeographyHandler:             geographyHandler,
+		SearchRoutesEnabled:          cfg.SearchRoutesEnabled,
+		SearchHandler:                searchHandler,
+		HomepageHandler:              homepageHandler,
+		BabbageHandler:               babbageHandler,
+		ZebedeeClient:                zebedeeClient,
+		ContentTypeByteLimit:         cfg.ContentTypeByteLimit,
 	}
 
 	httpHandler := router.New(routerConfig)
